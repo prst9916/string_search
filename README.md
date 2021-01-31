@@ -15,6 +15,6 @@ In your ABAP cloud project, create the ABAP package Z_STRINGSEARCH
 To add the abapGit Repositories view to the ABAP perspective, click Window > Show View > Other... from the menu bar and choose abapGit Repositories.
 In the abapGit Repositories view, click the + icon to clone an abapGit repository.
 Enter the following URL of this repository: https://github.com/prst9916/string_search.git and choose Next.
-Select the master branch and enter the newly created package Z_DOCSEARCH as the target package.
+Select the master branch and enter the newly created package Z_STRINGSEARCH as the target package.
 Create a new transport request that you only use for this demo content installation (recommendation) and choose Finish to start the cloning of the repository contents. Note that this procedure may take a few minutes.
 Once the cloning has finished, refresh your project tree.
