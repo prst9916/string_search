@@ -31,4 +31,4 @@ iii)ZCL_INDEX_STRING
 1) Create the texts in ZS010 transaction corresponding to the documents that have been provided.In this case, three documents have been provided for the test. Hence three texts ZTEXT1, ZTEXT2 and ZTEXT3 have been created in SO10 transaction corresponding to the three documents that have been provided.
 2) Upload the texts to the table ZSO10_SRCHTEXT.
 3) Maintain the entries in the table ZSO10_FILE corresponding to the texts that have been uploaded to the table ZSO10_SRCHTEXT. In this case, three entries have been created : i) ZTEXT1 - French_Armed_Forces.txt, ii)ZTEXT2 - Hitchhikers.txt iii)ZTEXT3 - Warp.txt
-4)Ensure that a full text index has been created on table ZSO10_SRCHTEXT
+4) Ensure that a full text index has been created on table ZSO10_SRCHTEXT.
