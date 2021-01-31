@@ -33,6 +33,9 @@ CLASS ZCL_INDEX_STRING_MATCH IMPLEMENTATION.
 
 
   method CLASS_CONSTRUCTOR.
+* Change to get the filenames
+* loaded from the table zso10_file
+* to the internal table
     Select tdname filetext
       from zso10_file
       into corresponding fields

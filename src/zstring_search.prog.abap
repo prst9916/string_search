@@ -73,7 +73,7 @@ START-OF-SELECTION.
     MESSAGE TEXT-001 TYPE 'E'.
   ENDIF.
   PERFORM remove_double_quotes.
-  WRITE: /5 TEXT-019.
+  WRITE: TEXT-019.
   IF p_perf = 'X'.
      Clear : d_regtotsrch_time,
              d_regextotsrch_time,

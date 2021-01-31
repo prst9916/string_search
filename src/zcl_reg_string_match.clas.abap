@@ -34,6 +34,9 @@ CLASS ZCL_REG_STRING_MATCH IMPLEMENTATION.
 
 
   method CLASS_CONSTRUCTOR.
+* Change to get the search texts loaded
+* from the table zso10_srchtext into
+* the internal table
     Select tdname tdline
       from zso10_srchtext
       into corresponding fields
@@ -41,6 +44,8 @@ CLASS ZCL_REG_STRING_MATCH IMPLEMENTATION.
     If sy-subrc EQ 0.
        SORT t_zso10_table BY tdname.
     Endif.
+* Change to get the filenames loaded
+* from the table
     Select tdname filetext
       from zso10_file
       into corresponding fields
