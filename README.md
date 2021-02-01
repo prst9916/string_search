@@ -34,3 +34,7 @@ iii)ZCL_INDEX_STRING
 4) Ensure that a full text index has been created on table ZSO10_SRCHTEXT.
 # Steps to execute the program
 The steps to execute the program have been explained in the document 'ZDOCSEARCH Tcode' attached in this git link.
+# Error Validations
+The error validations that have been handled in the program have been mentioned in the document 'Validations' attached in this git link
+# Tests performed
+The tests that have been performed have been mentioned in the document 'Tests performed' attached in this git link.
