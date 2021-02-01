@@ -56,125 +56,155 @@ CLASS ZCL_REG_STRING_MATCH IMPLEMENTATION.
   endmethod.
 
 
-  method ZIF_STRING_MATCH~MATCH.
-  Types : Begin of ly_text,
-               tline TYPE tline,
-          End of ly_text.
-  Data : lt_results          TYPE match_result_tab,
-         ls_result           LIKE LINE OF lt_results,
-         lv_start            TYPE i,
-         lv_end              TYPE i,
-         ls_text             TYPE ly_text,
-         lt_text             TYPE STANDARD TABLE OF ly_text,
-         ld_no_of_recs       TYPE i,
-         ld_strlen           TYPE i,
-         ld_index            TYPE i,
-         ld_space_exists(1)  TYPE C,
-         s_file_output       TYPE zso10_output.
-  GET RUN TIME FIELD lv_start.
-  CLEAR : lt_results.
-  REFRESH : lt_results.
-  If ip_perf = 'X'.
+  METHOD zif_string_match~match.
+    TYPES : BEGIN OF ly_text,
+              tline TYPE tdline,
+            END OF ly_text.
+    DATA : lt_results         TYPE match_result_tab,
+           ls_results         LIKE LINE OF lt_results,
+           lv_start           TYPE i,
+           lv_end             TYPE i,
+           ls_text            TYPE ly_text,
+           lt_text            TYPE STANDARD TABLE OF ly_text,
+           ld_no_of_recs      TYPE i,
+           ld_strlen          TYPE i,
+           ld_index           TYPE i,
+           ld_space_exists(1) TYPE c,
+           s_file_output      TYPE zso10_output.
+    CONSTANTS : lc_small_letter(26) TYPE c VALUE 'abcdefghijklmnopqrstuvwxyz'.
+    GET RUN TIME FIELD lv_start.
+    CLEAR : lt_results.
+    REFRESH : lt_results.
+    IF ip_perf = 'X'.
       ld_strlen = strlen( ip_string ).
-      Clear : ld_space_exists.
+      CLEAR : ld_space_exists.
       DO ld_strlen TIMES.
-          ld_index = sy-index - 1.
-          If ip_string+ld_index(1) CA ' '.
-             ld_space_exists = 'X'.
-          Else.
-             CONTINUE.
-          Endif.
-       ENDDO.
-       If ld_space_exists = 'X'.
-          FIND ALL OCCURRENCES OF ip_string IN TABLE lt_text
-          RESULTS lt_results.
-          DESCRIBE TABLE lt_results LINES ld_no_of_recs.
-       Else.
-          FIND ALL OCCURRENCES OF ip_string IN TABLE lt_text
-          RESULTS lt_results.
-          Clear : ld_no_of_recs.
-          SORT lt_results BY line.
-          DELETE ADJACENT DUPLICATES FROM lt_results COMPARING line.
-          LOOP AT lt_results INTO data(ls_results).
-               READ TABLE lt_text INTO ls_text INDEX ls_results-line.
-               If sy-subrc EQ 0.
-                  SPLIT ls_text AT ' ' INTO TABLE Data(lt_match_string).
-                  LOOP AT lt_match_string INTO Data(ls_match_string).
-                       If ls_match_string = ip_string.
-                          ld_no_of_recs = ld_no_of_recs + 1.
-                       Endif.
-                  ENDLOOP.
-                  Clear : lt_match_string.
-                  Refresh : lt_match_string.
-               Endif.
+        ld_index = sy-index - 1.
+        IF ip_string+ld_index(1) CA ' '.
+          ld_space_exists = 'X'.
+        ELSE.
+          CONTINUE.
+        ENDIF.
+      ENDDO.
+      LOOP AT t_zso10_file
+      INTO s_zso10_file.
+        READ TABLE t_zso10_table
+              INTO s_zso10_table
+        WITH KEY tdname = s_zso10_file-tdname
+        BINARY SEARCH.
+        IF sy-subrc EQ 0.
+          CLEAR : lt_text.
+          REFRESH : lt_text.
+          LOOP AT t_zso10_table
+          INTO s_zso10_table
+          FROM sy-tabix.
+            IF s_zso10_table-tdname = s_zso10_file-tdname.
+              ls_text-tline = s_zso10_table-tdline.
+              APPEND ls_text TO lt_text.
+            ELSE.
+              EXIT.
+            ENDIF.
           ENDLOOP.
-       Endif.
-  Else.
-  LOOP AT t_zso10_file
-       INTO s_zso10_file.
-    READ TABLE t_zso10_table
-           INTO s_zso10_table
-       WITH KEY tdname = s_zso10_file-tdname
-    BINARY SEARCH.
-    If sy-subrc EQ 0.
-       Clear : lt_text.
-       Refresh : lt_text.
-       LOOP AT t_zso10_table
-            INTO s_zso10_table
-       FROM sy-tabix.
-       If s_zso10_table-tdname = s_zso10_file-tdname.
-          ls_text-tline = s_zso10_table-tdline.
-          APPEND ls_text TO lt_text.
-       Else.
-          Exit.
-       Endif.
-       ENDLOOP.
-       ld_strlen = strlen( ip_string ).
-       Clear : ld_space_exists.
-       DO ld_strlen TIMES.
-          ld_index = sy-index - 1.
-          If ip_string+ld_index(1) CA ' '.
-             ld_space_exists = 'X'.
-          Else.
-             CONTINUE.
-          Endif.
-       ENDDO.
-       If ld_space_exists = 'X'.
-          FIND ALL OCCURRENCES OF ip_string IN TABLE lt_text
-          RESULTS lt_results.
-          DESCRIBE TABLE lt_results LINES ld_no_of_recs.
-          s_file_output-name = s_zso10_file-tdname.
-          s_file_output-filetext = s_zso10_file-filetext.
-          s_file_output-numofrecs = ld_no_of_recs.
-           APPEND s_file_output TO t_file_output.
-       Else.
-          FIND ALL OCCURRENCES OF ip_string IN TABLE lt_text
-          RESULTS lt_results.
-          Clear : ld_no_of_recs.
-          SORT lt_results BY line.
-          DELETE ADJACENT DUPLICATES FROM lt_results COMPARING line.
-          LOOP AT lt_results INTO ls_results.
-               READ TABLE lt_text INTO ls_text INDEX ls_results-line.
-               If sy-subrc EQ 0.
-                  SPLIT ls_text AT ' ' INTO TABLE lt_match_string.
-                  LOOP AT lt_match_string INTO ls_match_string.
-                       If ls_match_string = ip_string.
-                          ld_no_of_recs = ld_no_of_recs + 1.
-                       Endif.
-                  ENDLOOP.
-                  Clear : lt_match_string.
-                  Refresh : lt_match_string.
-               Endif.
+          IF ld_space_exists = 'X'.
+            FIND ALL OCCURRENCES OF ip_string IN TABLE lt_text
+            RESULTS lt_results.
+            DESCRIBE TABLE lt_results LINES ld_no_of_recs.
+          ELSE.
+            FIND ALL OCCURRENCES OF ip_string IN TABLE lt_text
+            RESULTS lt_results.
+            CLEAR : ld_no_of_recs.
+            LOOP AT lt_results INTO ls_results.
+              READ TABLE lt_text INTO ls_text INDEX ls_results-line.
+              IF sy-subrc EQ 0.
+                IF ls_results-offset GT 0.
+                  DATA(ld_prev_char) = ls_results-offset - 1.
+                  IF ls_text-tline+ld_prev_char(1) = ' '.
+                  ELSE.
+                    CONTINUE.
+                  ENDIF.
+                ENDIF.
+                DATA(ld_offset_char) = ls_results-offset + ls_results-length.
+                IF ls_text-tline+ld_offset_char(1) CA '0123456789' OR
+                   ls_text-tline+ld_offset_char(1) CA sy-abcde OR
+                   ls_text-tline+ld_offset_char(1) CA lc_small_letter.
+                  CONTINUE.
+                ENDIF.
+                ld_no_of_recs = ld_no_of_recs + 1.
+              ENDIF.
+            ENDLOOP.
+          ENDIF.
+        ENDIF.
+      ENDLOOP.
+    ELSE.
+      ld_strlen = strlen( ip_string ).
+      CLEAR : ld_space_exists.
+      DO ld_strlen TIMES.
+        ld_index = sy-index - 1.
+        IF ip_string+ld_index(1) CA ' '.
+          ld_space_exists = 'X'.
+        ELSE.
+          CONTINUE.
+        ENDIF.
+      ENDDO.
+      LOOP AT t_zso10_file
+           INTO s_zso10_file.
+        READ TABLE t_zso10_table
+               INTO s_zso10_table
+           WITH KEY tdname = s_zso10_file-tdname
+        BINARY SEARCH.
+        IF sy-subrc EQ 0.
+          CLEAR : lt_text.
+          REFRESH : lt_text.
+          LOOP AT t_zso10_table
+               INTO s_zso10_table
+          FROM sy-tabix.
+            IF s_zso10_table-tdname = s_zso10_file-tdname.
+              ls_text-tline = s_zso10_table-tdline.
+              APPEND ls_text TO lt_text.
+            ELSE.
+              EXIT.
+            ENDIF.
           ENDLOOP.
-          s_file_output-name = s_zso10_file-tdname.
-          s_file_output-filetext = s_zso10_file-filetext.
-          s_file_output-numofrecs = ld_no_of_recs.
-          APPEND s_file_output TO t_file_output.
-       Endif.
-    Endif.
-   ENDLOOP.
-   Endif.
-   GET RUN TIME FIELD lv_end.
-   time_taken = lv_end - lv_start.
-  endmethod.
+          IF ld_space_exists = 'X'.
+            FIND ALL OCCURRENCES OF ip_string IN TABLE lt_text
+            RESULTS lt_results.
+            DESCRIBE TABLE lt_results LINES ld_no_of_recs.
+            s_file_output-name = s_zso10_file-tdname.
+            s_file_output-filetext = s_zso10_file-filetext.
+            s_file_output-numofrecs = ld_no_of_recs.
+            APPEND s_file_output TO t_file_output.
+          ELSE.
+            FIND ALL OCCURRENCES OF ip_string IN TABLE lt_text
+            RESULTS lt_results.
+            CLEAR : ld_no_of_recs.
+            LOOP AT lt_results INTO ls_results.
+              READ TABLE lt_text INTO ls_text INDEX ls_results-line.
+              IF sy-subrc EQ 0.
+                IF ls_results-offset GT 0.
+                  ld_prev_char = ls_results-offset - 1.
+                  IF ls_text-tline+ld_prev_char(1) = ' '.
+                  ELSE.
+                    CONTINUE.
+                  ENDIF.
+                ENDIF.
+                ld_offset_char = ls_results-offset + ls_results-length.
+                IF ls_text-tline+ld_offset_char(1) CA '0123456789' OR
+                   ls_text-tline+ld_offset_char(1) CA sy-abcde OR
+                   ls_text-tline+ld_offset_char(1) CA lc_small_letter.
+                  CONTINUE.
+                ENDIF.
+                ld_no_of_recs = ld_no_of_recs + 1.
+              ENDIF.
+            ENDLOOP.
+            s_file_output-name = s_zso10_file-tdname.
+            s_file_output-filetext = s_zso10_file-filetext.
+            s_file_output-numofrecs = ld_no_of_recs.
+            APPEND s_file_output TO t_file_output.
+          ENDIF.
+        ENDIF.
+      ENDLOOP.
+    ENDIF.
+    GET RUN TIME FIELD lv_end.
+    time_taken = lv_end - lv_start.
+  ENDMETHOD.
 ENDCLASS.

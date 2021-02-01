@@ -138,9 +138,15 @@
      <LENGTH>74</LENGTH>
     </item>
     <item>
+     <ID>I</ID>
+     <KEY>022</KEY>
+     <ENTRY>Please enter number of characters</ENTRY>
+     <LENGTH>66</LENGTH>
+    </item>
+    <item>
      <ID>R</ID>
-     <ENTRY>String search using object oriented abap</ENTRY>
-     <LENGTH>40</LENGTH>
+     <ENTRY>Document Search transaction</ENTRY>
+     <LENGTH>27</LENGTH>
     </item>
     <item>
      <ID>S</ID>

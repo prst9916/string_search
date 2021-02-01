@@ -72,6 +72,9 @@ START-OF-SELECTION.
   IF p_perf NE 'X' AND p_sterm IS INITIAL.
     MESSAGE TEXT-001 TYPE 'E'.
   ENDIF.
+  IF p_perf EQ 'X' and p_nchar IS INITIAL.
+     MESSAGE text-022 TYPE 'E'.
+  ENDIF.
   PERFORM remove_double_quotes.
   WRITE: TEXT-019.
   IF p_perf = 'X'.
