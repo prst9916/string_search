@@ -33,4 +33,4 @@ iii)ZCL_INDEX_STRING
 3) Maintain the entries in the table ZSO10_FILE corresponding to the texts that have been uploaded to the table ZSO10_SRCHTEXT. In this case, three entries have been created : i) ZTEXT1 - French_Armed_Forces.txt, ii)ZTEXT2 - Hitchhikers.txt iii)ZTEXT3 - Warp.txt
 4) Ensure that a full text index has been created on table ZSO10_SRCHTEXT.
 # Steps to execute the program
-The steps to execute the program have been explained in the document 'Program execution steps' attached in this git link.
+The steps to execute the program have been explained in the document 'ZDOCSEARCH Tcode' attached in this git link.
