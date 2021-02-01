@@ -60,7 +60,7 @@ CLASS ZCL_INDEX_STRING_MATCH IMPLEMENTATION.
            ld_index           TYPE i,
            s_file_output      TYPE zso10_output,
            ld_space_exists(1) TYPE c.
-    CONSTANTS : lc_small_letter(26) TYPE C VALUE 'abcdefghijklmnopqrstuvwxyz'.
+    CONSTANTS : lc_small_letter(26) TYPE c VALUE 'abcdefghijklmnopqrstuvwxyz'.
     GET RUN TIME FIELD lv_start.
     DATA(lv_query) = |SELECT tdname,tdline FROM zso10_srchtext WHERE CONTAINS (tdline, '{ ip_string }')|.
     DATA(lr_sql) = NEW cl_sql_statement( ).
@@ -69,6 +69,16 @@ CLASS ZCL_INDEX_STRING_MATCH IMPLEMENTATION.
     DATA(lv_recs) = lr_res->next_package( ).
     IF t_result[] IS NOT INITIAL.
       IF ip_perf = 'X'.
+        DATA(ld_strlen) = strlen( ip_string ).
+        CLEAR : ld_space_exists.
+        DO ld_strlen TIMES.
+          ld_index = sy-index - 1.
+          IF ip_string+ld_index(1) CA ' '.
+            ld_space_exists = 'X'.
+          ELSE.
+            CONTINUE.
+          ENDIF.
+        ENDDO.
         LOOP AT t_zso10_file
              INTO s_zso10_file.
           CLEAR : lt_text.
@@ -87,23 +97,13 @@ CLASS ZCL_INDEX_STRING_MATCH IMPLEMENTATION.
                 EXIT.
               ENDIF.
             ENDLOOP.
-            DATA(ld_strlen) = strlen( ip_string ).
-            CLEAR : ld_space_exists.
-            DO ld_strlen TIMES.
-              ld_index = sy-index - 1.
-              IF ip_string+ld_index(1) CA ' '.
-                ld_space_exists = 'X'.
-              ELSE.
-                CONTINUE.
-              ENDIF.
-            ENDDO.
             IF ld_space_exists = 'X'.
               FIND ALL OCCURRENCES OF ip_string IN TABLE lt_text
               RESULTS lt_results.
               DESCRIBE TABLE lt_results LINES ld_no_of_recs.
             ELSE.
               FIND ALL OCCURRENCES OF ip_string IN TABLE lt_text
-            RESULTS lt_results.
+              RESULTS lt_results.
               CLEAR : ld_no_of_recs.
               LOOP AT lt_results INTO ls_results.
                 READ TABLE lt_text INTO ls_text INDEX ls_results-line.
@@ -128,6 +128,16 @@ CLASS ZCL_INDEX_STRING_MATCH IMPLEMENTATION.
           ENDIF.
         ENDLOOP.
       ELSE.
+         ld_strlen = strlen( ip_string ).
+            CLEAR : ld_space_exists.
+            DO ld_strlen TIMES.
+              ld_index = sy-index - 1.
+              IF ip_string+ld_index(1) CA ' '.
+                ld_space_exists = 'X'.
+              ELSE.
+                CONTINUE.
+              ENDIF.
+            ENDDO.
         LOOP AT t_zso10_file
              INTO s_zso10_file.
           CLEAR : lt_text,
@@ -147,16 +157,6 @@ CLASS ZCL_INDEX_STRING_MATCH IMPLEMENTATION.
                 EXIT.
               ENDIF.
             ENDLOOP.
-            ld_strlen = strlen( ip_string ).
-            CLEAR : ld_space_exists.
-            DO ld_strlen TIMES.
-              ld_index = sy-index - 1.
-              IF ip_string+ld_index(1) CA ' '.
-                ld_space_exists = 'X'.
-              ELSE.
-                CONTINUE.
-              ENDIF.
-            ENDDO.
             IF ld_space_exists = 'X'.
               FIND ALL OCCURRENCES OF ip_string IN TABLE lt_text
               RESULTS lt_results.
@@ -168,37 +168,37 @@ CLASS ZCL_INDEX_STRING_MATCH IMPLEMENTATION.
               LOOP AT lt_results INTO ls_results.
                 READ TABLE lt_text INTO ls_text INDEX ls_results-line.
                 IF sy-subrc EQ 0.
-                      IF ls_results-offset GT 0.
-                        ld_prev_char = ls_results-offset - 1.
-                        IF ls_text-tline+ld_prev_char(1) = ' '.
-                        ELSE.
-                          CONTINUE.
-                        ENDIF.
-                      ENDIF.
-                      ld_offset_char = ls_results-offset + ls_results-length.
-                      IF ls_text-tline+ld_offset_char(1) CA '0123456789' OR
-                         ls_text-tline+ld_offset_char(1) CA sy-abcde OR
-                         ls_text-tline+ld_offset_char(1) CA lc_small_letter.
-                        CONTINUE.
-                      ENDIF.
-                      ld_no_of_recs = ld_no_of_recs + 1.
+                  IF ls_results-offset GT 0.
+                    ld_prev_char = ls_results-offset - 1.
+                    IF ls_text-tline+ld_prev_char(1) = ' '.
+                    ELSE.
+                      CONTINUE.
                     ENDIF.
-                  ENDLOOP.
+                  ENDIF.
+                  ld_offset_char = ls_results-offset + ls_results-length.
+                  IF ls_text-tline+ld_offset_char(1) CA '0123456789' OR
+                     ls_text-tline+ld_offset_char(1) CA sy-abcde OR
+                     ls_text-tline+ld_offset_char(1) CA lc_small_letter.
+                    CONTINUE.
+                  ENDIF.
+                  ld_no_of_recs = ld_no_of_recs + 1.
                 ENDIF.
-                s_file_output-name = s_zso10_file-tdname.
-                s_file_output-filetext = s_zso10_file-filetext.
-                s_file_output-numofrecs = ld_no_of_recs.
-                APPEND s_file_output TO t_file_output.
-              ELSE.
-                s_file_output-name = s_zso10_file-tdname.
-                s_file_output-filetext = s_zso10_file-filetext.
-                s_file_output-numofrecs = ld_no_of_recs.
-                APPEND s_file_output TO t_file_output.
-              ENDIF.
-            ENDLOOP.
+              ENDLOOP.
+            ENDIF.
+            s_file_output-name = s_zso10_file-tdname.
+            s_file_output-filetext = s_zso10_file-filetext.
+            s_file_output-numofrecs = ld_no_of_recs.
+            APPEND s_file_output TO t_file_output.
+          ELSE.
+            s_file_output-name = s_zso10_file-tdname.
+            s_file_output-filetext = s_zso10_file-filetext.
+            s_file_output-numofrecs = ld_no_of_recs.
+            APPEND s_file_output TO t_file_output.
           ENDIF.
-        ENDIF.
-        GET RUN TIME FIELD lv_end.
-        time_taken = lv_end - lv_start.
-      ENDMETHOD.
+        ENDLOOP.
+      ENDIF.
+    ENDIF.
+    GET RUN TIME FIELD lv_end.
+    time_taken = lv_end - lv_start.
+  ENDMETHOD.
 ENDCLASS.
